@@ -21,11 +21,12 @@ pip install sqlalchemy
 pip install PyMySQL
 pip install numpy
 pip install streamlit-option-menu
-pip install easyocr
+
 pip install Pillow
 ```
 
-# Install PyTorch
+# Install PyTorch and easyocr
 ```
 install pytorch https://pytorch.org/
+pip install easyocr
 ```
