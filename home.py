@@ -16,7 +16,7 @@ st.title("Bizcard Data extraction")
 #st.markdown("<style>div.block-container {padding-top: 1rem;}</style>", unsafe_allow_html=True)
  
 
-# establish the connection to sql server 
+#============================================================== establish the connection to sql server=================================================================== 
 @st.cache_data
 def create_Database():
     mydb = mysql.connector.connect(host="localhost", user="root",password="")
@@ -29,7 +29,7 @@ def create_Database():
     except :
         pass
           
-
+# =========================================================== Creating the table ========================================================================================
 def create_table():
     cnx = create_engine('mysql+pymysql://root:@localhost/bizcard')
     with cnx.connect() as mycursor:
@@ -40,7 +40,7 @@ def create_table():
             print(f"Error in data loading: {e}")
 
 
-
+#========================================================== Load the data into the table created =====================================================================
 def load_data(table):
     cnx = create_engine('mysql+pymysql://root:@localhost/bizcard')
     try:
@@ -49,10 +49,7 @@ def load_data(table):
     except Exception as e:
            print(f"Error in data loading: {e}")
         
-            
-
-
-
+# ============================================================= retrive the data from the database ===================================================================           
 def retrive_data(): 
     cnx = create_engine('mysql+pymysql://root:@localhost/bizcard')
     with cnx.connect() as mycursor:
@@ -63,7 +60,7 @@ def retrive_data():
             st.write(f"Error: {e}")
             
     
-    
+#================================================================= getting the dara from the image ====================================================================
 @st.cache_data
 def get_data_image(result):
     Pincode = ''
@@ -89,7 +86,7 @@ def get_data_image(result):
         if len([*pin]) == 6:
             Pincode ="".join(pin)
      
-    # contact nu,ber 
+    # contact number 
     for i in result:
         x =i[1]
         phone = re.findall("\d",x)
@@ -97,14 +94,15 @@ def get_data_image(result):
             contact_num .append("".join(phone))
         elif "+" in x:
             contact_num.append(x)
-    #3     
+            
+    #3   mail  
     for i in result:
         x =i[1]
         if "@" in x:
                 mail_id =x
     
             
-    #6   
+    #6  website
     pattern1 = r"\bwww\w*\b"  
     pattern2 = r"\.com\b"  
     a = []
@@ -118,7 +116,7 @@ def get_data_image(result):
     website = ".".join(a).replace(" ",".")
     
     
-    #7
+    #7 Address
     b = []
     for i in result:
         x = i[1]
@@ -137,7 +135,7 @@ def get_data_image(result):
                 
     Address = ",".join(b).replace(";",",").replace(" ","")
     
-    
+    # Getting the compay name
     c_name = []
     for i in result :
         x=i[1]
@@ -155,7 +153,9 @@ def get_data_image(result):
 
 
     return name,position,mail_id,contact_num,website,Address, Pincode,company_name
-            
+  
+  
+#====================================================================== Reading the image data ========================================================================     
 @st.cache_data
 def read_image(img):
     reader = easyocr.Reader(["en"],gpu=False)
@@ -164,30 +164,33 @@ def read_image(img):
     return out
     
  
-   
+ # ====================================================================== uploading the image =========================================================================
 def upload_image(imagefile):
     
-    
-    if imagefile is not None:
-        
-        image = Image.open(imagefile)
-        numpydata = asarray( image)
-        out = read_image(numpydata)
-        name = [out[0]]
-        Position = [out[1]]
-        mail = [out[2]]
-        contact = [",".join(out[3])]
-        website = [out[4]]
-        Address = [out[5]]
-        Pincode = [out[6]]
-        card_name = [out[7]]
+    try: 
+        if imagefile is not None:
             
-        card_table = pd.DataFrame({"Name":name,"Position":Position,"Contact":contact,"Card_name":card_name,"Mail":mail,"Website":website,"Address":Address,"Pincode":Pincode}) 
-        return card_table   
-    else:
-        st.write("upload the correct image")
+            image = Image.open(imagefile)
+            numpydata = asarray( image)
+            out = read_image(numpydata)
+            name = [out[0]]
+            Position = [out[1]]
+            mail = [out[2]]
+            contact = [",".join(out[3])]
+            website = [out[4]]
+            Address = [out[5]]
+            Pincode = [out[6]]
+            card_name = [out[7]]
+                
+            card_table = pd.DataFrame({"Name":name,"Position":Position,"Contact":contact,"Card_name":card_name,"Mail":mail,"Website":website,"Address":Address,"Pincode":Pincode}) 
+            return card_table   
+        else:
+            st.write("upload the correct image")
+    except Exception as e:
+        st.warning("The image format is wrong. upload the image in [JPG,PNG]")   
+        print(e)
    
-   
+# ====================================================================== showing the scanned image data ================================================================
 def show_data(values):
     series_valu = values.iloc[0,:]
     name =  series_valu.iloc[0]
@@ -202,7 +205,7 @@ def show_data(values):
     return name  
 
 
-
+#==================================================================== delete the stored information ====================================================================
 def delete_info(names):
     cnx = create_engine('mysql+pymysql://root:@localhost/bizcard')
     with cnx.connect() as mycursor:
@@ -214,8 +217,7 @@ def delete_info(names):
             st.success("Record Deleted")
             return "a"
     
-
-
+#=========================================================== update the stored information in the database  based on the options ======================================= 
 def update_info(name,values):
     cnx = create_engine('mysql+pymysql://root:@localhost/bizcard')
     with cnx.connect() as mycursor:
@@ -299,7 +301,7 @@ def update_info(name,values):
     
         
     
-   
+#========================================================== setting the side bar for upload ,edit,delete =============================================================
 def set_sidebar():
     Selected = option_menu(
         menu_title=None,
@@ -314,18 +316,21 @@ def set_sidebar():
             card_table = upload_image(imagefile)  
             c1,c2 =st.columns(2)
             with c1:
-                image = Image.open(imagefile)
-                newsize = (700,500)
-                im1 = image.resize(newsize)
-                st.image(im1, caption='Image')
-            with c2:
-                v = st.data_editor(card_table)
-                st.write("click the button to store the data")
-                if st.button ("Submit"):
-                    data_frame = pd.DataFrame(v)
-                    load_data(data_frame)
-                    #st.success("The data is stored.....")
-            
+                try :
+                    image = Image.open(imagefile)
+                    newsize = (700,500)
+                    im1 = image.resize(newsize)
+                    st.image(im1, caption='Image')
+                    with c2:
+                        v = st.data_editor(card_table)
+                        st.write("click the button to store the data")
+                        if st.button ("Submit"):
+                            data_frame = pd.DataFrame(v)
+                            load_data(data_frame)
+                            #st.success("The data is stored.....")
+                except  Exception as e:
+                    print(e)    
+                
         else:
             cl2,cl2,cl3 = st.columns(3)
             with cl2:
@@ -387,4 +392,4 @@ def set_sidebar():
             
 set_sidebar()
 
-    
+#=================================================================================================================================================================================================
