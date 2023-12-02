@@ -1,6 +1,6 @@
 # Business Card OCR Application
 
-## Problem Statement
+## **Overview**
 
 The task is to develop a Streamlit application that facilitates the extraction of relevant information from business cards using easyOCR. The extracted information includes the company name, card holder name, designation, mobile number, email address, website URL, area, city, state, and pin code. Additionally, the application should allow users to save this information, along with the uploaded business card image, into a database. The database should support multiple entries, each with its own business card image and extracted information.
 
