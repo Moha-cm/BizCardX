@@ -11,8 +11,10 @@ Make sure to have the following packages installed:
 ```bash
 # Install Python
 install python
+```
 
 # Required Python Packages
+```
 pip install pandas
 pip install streamlit
 pip install sqlalchemy
@@ -21,6 +23,9 @@ pip install numpy
 pip install streamlit-option-menu
 pip install easyocr
 pip install Pillow
+```
 
 # Install PyTorch
+```
 install pytorch https://pytorch.org/
+```
