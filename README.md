@@ -24,5 +24,3 @@ pip install Pillow
 
 # Install PyTorch
 install pytorch https://pytorch.org/
-
-
